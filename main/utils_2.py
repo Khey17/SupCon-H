@@ -1,8 +1,11 @@
 import os
+from typing import Any, Callable, Optional
 from PIL import Image
 from torchvision import transforms, datasets
 import cv2
 import numpy as np
+from torchvision.datasets.folder import default_loader
+from random import sample
 
 
 class FERPair(datasets.ImageFolder):
@@ -36,6 +39,36 @@ class FERPair(datasets.ImageFolder):
 
     def __len__(self):
         return len(self.images)
+
+
+# creating pairs of positive samples for ferplus
+class FERPair_true_label(datasets.ImageFolder):
+    # randomly sampling the pairs of positive samples
+    def __init__(self, root, train=True, transform=None):
+        super().__init__(root=root, train=train, transform=transform)
+        def get_labels(i):
+            return [i for i in range(len(self)) if self.targets[i]==1]
+        
+        self.label_index = [get_labels(i) for i in range(8)]
+
+        def __getitem__(self, i):
+            img1, target = self.data[i], self.targets[i]
+
+            i_example_same_label = sample(self.label_index[self.targets[i]], 1)[0]
+            img2 = self.data[i_example_same_label]
+
+            img1 = Image.fromarray(img1)
+            img2 = Image.fromarray(img2)
+
+            if self.transform is not None:
+                pos_1 = self.transform(img1)
+                pos_2 = self.transform(img2)
+
+            if self.target_transform is not None:
+                target = self.target_transform(target)
+
+            return pos_1, pos_2, target
+
 
 
 
@@ -81,10 +114,15 @@ def get_dataset(dataset_name, M_view, N_view, root='C:/Users/Karth/Downloads/H-S
             memory_data = FERPair(root="./data", train=True, transform=test_transform)
             test_data = FERPair(root="./data", train=False, transform=test_transform)
 
+        elif dataset_name == 'ferpair_true_label':
+            train_data = FERPair_true_label(root=root, train=True, transform=train_transform)
+            memory_data = FERPair_true_label(root=root, train=True, transform=test_transform)
+            test_data = FERPair_true_label(root=root, train=False, transform=test_transform)
+
         else:
             raise Exception('Invalid dataset name')
     else:
-        if dataset_name == 'ferplus':
+        if dataset_name in ['ferplus', 'ferpair_true_label']:
             train_data = FERPair(root="./data", train=True, transform=train_transform)
             memory_data = FERPair(root="./data", train=True, transform=test_transform)
             test_data = FERPair(root="./data", train=False, transform=test_transform)
