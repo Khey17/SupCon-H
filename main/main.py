@@ -115,7 +115,7 @@ def test(net, memory_data_loader, test_data_loader, beta, dataset_name, estimato
         # [N]
         if 'cifar' in dataset_name:
             feature_labels = torch.tensor(memory_data_loader.dataset.targets, device=feature_bank.device) 
-        elif 'stl' in dataset_name:
+        elif 'ferpair_true_label' in dataset_name:
             feature_labels = torch.tensor(memory_data_loader.dataset.labels, device=feature_bank.device) 
         elif 'ferplus' in dataset_name:
             feature_labels = torch.tensor(memory_data_loader.dataset.labels, device=feature_bank.device)
@@ -160,8 +160,8 @@ if __name__ == '__main__':
     parser.add_argument('--feature_dim', default=128, type=int, help='Feature dim for latent vector')
     parser.add_argument('--temperature', default=0.5, type=float, help='Temperature used in softmax')
     parser.add_argument('--k', default=200, type=int, help='Top k most similar images used to predict the label')
-    parser.add_argument('--batch_size', default=32, type=int, help='Number of images in each mini-batch')
-    parser.add_argument('--epochs', default=10, type=int, help='Number of sweeps over the dataset to train')
+    parser.add_argument('--batch_size', default=256, type=int, help='Number of images in each mini-batch')
+    parser.add_argument('--epochs', default=200, type=int, help='Number of sweeps over the dataset to train')
     parser.add_argument('--estimator', default='hard', type=str, help='Choose loss function')
     parser.add_argument('--dataset_name', default='ferplus', type=str, help='Choose dataset')
     parser.add_argument('--beta', default=0.5, type=float, help='beta')
