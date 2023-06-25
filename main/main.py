@@ -139,7 +139,10 @@ def train(net, data_loader, train_optimizer, temperature, estimator, beta):
         train_optimizer.zero_grad()
         #Choose one unsupervised loss to for optimizing
         #For supervised case please refer to main.py
-        loss_hucl.backward()
+        loss_hucl.backward(retain_graph=True)
+        loss_ucl.backward(retain_graph=True)
+        loss_hscl.backward(retain_graph=True)
+        loss_scl.backward(retain_graph=True)
         train_optimizer.step()
 
         total_num += batch_size
